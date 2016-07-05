@@ -1,0 +1,6 @@
+node_modules
+coverage
+npm-debug.log
+VERSION
+dist
+.DS_Store

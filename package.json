@@ -1,0 +1,33 @@
+{
+  "name": "expressify",
+  "version": "0.1.0",
+  "description": "Promisify express routes",
+  "main": "expressify.js",
+  "directories": {
+    "test": "test"
+  },
+  "files": [
+    "./expressify.js"
+  ],
+  "scripts": {
+    "test": "eslint expressify.js test && mocha",
+    "postversion": "git push origin HEAD && git push origin $(git describe --tags) && npm publish"
+  },
+  "keywords": [
+    "express",
+    "promise",
+    "expressify"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.4.1"
+  },
+  "devDependencies": {
+    "eslint": "^2.13.1",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.10.1",
+    "mocha": "^2.5.3",
+    "sinon": "^1.17.4",
+    "sinon-as-promised": "^4.0.0"
+  }
+}
