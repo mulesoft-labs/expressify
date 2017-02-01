@@ -17,7 +17,6 @@ function expressify(functionOrObject) {
 function expressifyFunction(fn) {
   return function expressify(req, res, next) { // eslint-disable-line no-shadow
     return bluebird.method(fn)(req, res)
-      .then(() => next())
       .catch(next);
   };
 }

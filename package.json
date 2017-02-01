@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "test": "eslint expressify.js test && mocha",
+    "test:watch": "mocha --watch",
     "postversion": "git push origin HEAD && git push origin $(git describe --tags) && npm publish"
   },
   "keywords": [

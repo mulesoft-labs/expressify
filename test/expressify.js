@@ -26,10 +26,9 @@ describe('expressify', () => {
     });
 
     describe('when resolving', () => {
-      it('should call next fn', (done) => {
+      it('should not call next fn', (done) => {
         expressified.resolved(null, null, callback).finally(() => {
-          assert(callback.called);
-          assert.equal(callback.firstCall.args.length, 0);
+          assert(callback.notCalled);
           done();
         });
       });
@@ -57,10 +56,9 @@ describe('expressify', () => {
         callback = sinon.spy();
       });
 
-      it('should call next fn', (done) => {
+      it('should not call next fn', (done) => {
         expressified(null, null, callback).finally(() => {
-          assert(callback.called);
-          assert.equal(callback.firstCall.args.length, 0);
+          assert(callback.notCalled);
           done();
         });
       });
