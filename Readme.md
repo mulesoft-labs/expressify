@@ -15,11 +15,11 @@ npm install expressify
 Controller:
 
 ```js
-var expressify = require('expressify');
+const expressify = require('expressify');
 
-var controller = expressify({
-  foo: foo,
-  bar: bar
+const controller = expressify({
+  foo,
+  bar
 });
 
 function foo(req, res) {
@@ -36,10 +36,10 @@ module.exports = controller;
 Express configuration:
 
 ```js
-var controller = require('./your_controller');
+const { foo, bar } = require('./your_controller');
 
-app.get('/foo', controller.foo);
-app.get('/bar', controller.bar);
+app.get('/foo', foo);
+app.get('/bar', bar);
 ```
 
 ## License
