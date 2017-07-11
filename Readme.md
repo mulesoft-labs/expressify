@@ -15,7 +15,8 @@ npm install expressify
 Controller:
 
 ```js
-const expressify = require('expressify');
+const expressify = require('expressify')(callback);
+// callback function will be execute after an expressify function resolves
 
 const controller = expressify({
   foo,
