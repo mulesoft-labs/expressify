@@ -13,11 +13,15 @@ describe('expressify', () => {
 
   describe('an object', () => {
     let obj;
+    let req;
+    let res;
     let response;
     let expressified;
     let nextCallback;
 
     beforeEach(() => {
+      req = 'req';
+      res = 'res';
       response = 'foo';
       const resolved = sinon.stub().resolves(response);
       const rejected = sinon.stub().rejects(theError);
@@ -57,9 +61,9 @@ describe('expressify', () => {
 
       describe('when resolving', () => {
         it('should call callback after resolve with the response', (done) => {
-          expressified.resolved(null, null, nextCallback).finally(() => {
+          expressified.resolved(req, res, nextCallback).finally(() => {
             assert(nextCallback.notCalled);
-            assert(resolveCallback.calledWith(response));
+            assert(resolveCallback.calledWith(req, res));
             done();
           });
         });
@@ -78,6 +82,8 @@ describe('expressify', () => {
   });
 
   describe('a function', () => {
+    let req;
+    let res;
     let resolved;
     let rejected;
     let response;
@@ -85,6 +91,8 @@ describe('expressify', () => {
     let nextCallback;
 
     beforeEach(() => {
+      req = 'req';
+      res = 'res';
       response = 'foo';
       resolved = sinon.stub().resolves(response);
       rejected = sinon.stub().rejects(theError);
@@ -126,9 +134,9 @@ describe('expressify', () => {
         beforeEach(() => (expressified = expressifyWithCallback(resolved)));
 
         it('should call callback after resolve with the response', (done) => {
-          expressified(null, null, nextCallback).finally(() => {
+          expressified(req, res, nextCallback).finally(() => {
             assert(nextCallback.notCalled);
-            assert(resolveCallback.calledWith(response));
+            assert(resolveCallback.calledWith(req, res));
             done();
           });
         });
