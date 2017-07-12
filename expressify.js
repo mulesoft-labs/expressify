@@ -2,31 +2,30 @@
 
 const bluebird = require('bluebird');
 
-// ---
-
-module.exports = expressify;
-
-/**
- * @param  {Function|Object} functionOrObject
- * @return {Function|Object}
- */
-function expressify(functionOrObject) {
-  return (typeof functionOrObject === 'function' ? expressifyFunction : expressifyObject)(functionOrObject);
-}
-
-function expressifyFunction(fn) {
-  return function expressify(req, res, next) { // eslint-disable-line no-shadow
-    return bluebird.method(fn)(req, res)
-      .catch(next);
+module.exports = function expressify(callback = () => {}) {
+  /**
+   * @param  {Function|Object} functionOrObject
+   * @return {Function|Object}
+   */
+  return function (functionOrObject) {
+    return (typeof functionOrObject === 'function' ? expressifyFunction : expressifyObject)(functionOrObject);
   };
-}
 
-function expressifyObject(object) {
-  const result = {};
+  function expressifyFunction(fn) {
+    return function expressify(req, res, next) { // eslint-disable-line no-shadow
+      return bluebird.method(fn)(req, res)
+        .then(() => callback(req, res))
+        .catch(next);
+    };
+  }
 
-  Object.keys(object).forEach((key) => {
-    result[key] = expressifyFunction(object[key]);
-  });
+  function expressifyObject(object) {
+    const result = {};
 
-  return result;
-}
+    Object.keys(object).forEach((key) => {
+      result[key] = expressifyFunction(object[key]);
+    });
+
+    return result;
+  }
+};

@@ -1,6 +1,6 @@
 'use strict';
 
-const expressify = require('../expressify');
+const expressify = require('../expressify')();
 const bluebird = require('bluebird');
 const sinon = require('sinon');
 const assert = require('assert');
@@ -12,23 +12,29 @@ describe('expressify', () => {
   const theError = new Error('some error');
 
   describe('an object', () => {
-    let expressified;
     let obj;
-    let callback;
+    let req;
+    let res;
+    let response;
+    let expressified;
+    let nextCallback;
 
     beforeEach(() => {
-      const resolved = sinon.stub().resolves('foo');
+      req = 'req';
+      res = 'res';
+      response = 'foo';
+      const resolved = sinon.stub().resolves(response);
       const rejected = sinon.stub().rejects(theError);
 
       obj = { resolved, rejected };
       expressified = expressify(obj);
-      callback = sinon.spy();
+      nextCallback = sinon.spy();
     });
 
     describe('when resolving', () => {
       it('should not call next fn', (done) => {
-        expressified.resolved(null, null, callback).finally(() => {
-          assert(callback.notCalled);
+        expressified.resolved(null, null, nextCallback).finally(() => {
+          assert(nextCallback.notCalled);
           done();
         });
       });
@@ -36,49 +42,115 @@ describe('expressify', () => {
 
     describe('when failing', () => {
       it('should call next with the error when failing', (done) => {
-        expressified.rejected(null, null, callback).finally(() => {
-          assert(callback.calledWith(theError));
+        expressified.rejected(null, null, nextCallback).finally(() => {
+          assert(nextCallback.calledWith(theError));
           done();
+        });
+      });
+    });
+
+    describe('when callback is define', () => {
+      let resolveCallback;
+      let expressifyWithCallback;
+
+      beforeEach(() => {
+        resolveCallback = sinon.spy();
+        expressifyWithCallback = require('../expressify')(resolveCallback);
+        expressified = expressifyWithCallback(obj);
+      });
+
+      describe('when resolving', () => {
+        it('should call callback after resolve with the response', (done) => {
+          expressified.resolved(req, res, nextCallback).finally(() => {
+            assert(nextCallback.notCalled);
+            assert(resolveCallback.calledWith(req, res));
+            done();
+          });
+        });
+      });
+
+      describe('when failing', () => {
+        it('should call next with the error when failing and dont call callback', (done) => {
+          expressified.rejected(null, null, nextCallback).finally(() => {
+            assert(nextCallback.calledWith(theError));
+            assert(resolveCallback.notCalled);
+            done();
+          });
         });
       });
     });
   });
 
   describe('a function', () => {
-    describe('when resolving', () => {
-      let resolved;
-      let expressified;
-      let callback;
+    let req;
+    let res;
+    let resolved;
+    let rejected;
+    let response;
+    let expressified;
+    let nextCallback;
 
-      before(() => {
-        resolved = sinon.stub().resolves('foo');
-        expressified = expressify(resolved);
-        callback = sinon.spy();
-      });
+    beforeEach(() => {
+      req = 'req';
+      res = 'res';
+      response = 'foo';
+      resolved = sinon.stub().resolves(response);
+      rejected = sinon.stub().rejects(theError);
+      nextCallback = sinon.spy();
+    });
+
+    describe('when resolving', () => {
+      beforeEach(() => (expressified = expressify(resolved)));
 
       it('should not call next fn', (done) => {
-        expressified(null, null, callback).finally(() => {
-          assert(callback.notCalled);
+        expressified(null, null, nextCallback).finally(() => {
+          assert(nextCallback.notCalled);
           done();
         });
       });
     });
 
     describe('when failing', () => {
-      let rejected;
-      let expressified;
-      let callback;
-
-      before(() => {
-        rejected = sinon.stub().rejects(theError);
-        expressified = expressify(rejected);
-        callback = sinon.spy();
-      });
+      beforeEach(() => (expressified = expressify(rejected)));
 
       it('should call next fn with the error', (done) => {
-        expressified(null, null, callback).finally(() => {
-          assert(callback.calledWith(theError));
+        expressified(null, null, nextCallback).finally(() => {
+          assert(nextCallback.calledWith(theError));
           done();
+        });
+      });
+    });
+
+    describe('when callback is define', () => {
+      let resolveCallback;
+      let expressifyWithCallback;
+
+      beforeEach(() => {
+        resolveCallback = sinon.spy();
+        expressifyWithCallback = require('../expressify')(resolveCallback);
+      });
+
+      describe('when resolving', () => {
+        beforeEach(() => (expressified = expressifyWithCallback(resolved)));
+
+        it('should call callback after resolve with the response', (done) => {
+          expressified(req, res, nextCallback).finally(() => {
+            assert(nextCallback.notCalled);
+            assert(resolveCallback.calledWith(req, res));
+            done();
+          });
+        });
+      });
+
+      describe('when failing', () => {
+        beforeEach(() => (expressified = expressifyWithCallback(rejected)));
+
+        it('should call next fn with the error and dont call the callback', (done) => {
+          expressified(null, null, nextCallback).finally(() => {
+            assert(nextCallback.calledWith(theError));
+            assert(resolveCallback.notCalled);
+            done();
+          });
         });
       });
     });
